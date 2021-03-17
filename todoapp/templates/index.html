@@ -10,5 +10,15 @@
             <li>{{ d.description }}</li>
             {% endfor %}
         </ul>
+
+        <form action="/create" method="post">
+            <div >
+                <label for="todo">Create a To-Do</label>
+                <input type="text" name="todo">
+            </div>
+            <div>
+                <input type="submit" name="submit" id="submit" value="Create">
+            </div>
+        </form>
     </body>
 </html>
