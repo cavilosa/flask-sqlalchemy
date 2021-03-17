@@ -1,6 +1,5 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask import request
 
 app = Flask(__name__) # the app gets named after the name of the file
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:cavilosa1@localhost:5432/todoapp'
@@ -19,21 +18,19 @@ db.create_all()
 
 @app.route("/")
 def index():
+    empty = Todo.query.filter(Todo.description=="")
+    empty.delete()
+    db.session.commit()
     return render_template("index.html", data=Todo.query.all())
 
-@app.route("/create", methods=["POST"])
-def create():
-    list = Todo.query.all()
-    todo = request.form.get("todo")
-    if todo in list and todo != "":
-        return render_template("index.html", data=Todo.query.all())
-    else:
-        item = Todo(description=todo)
-        db.session.add(item)
-        db.session.commit()
+@app.route("/todos/create", methods=["POST"])
+def create_todo():
+    description = request.form.get("description", "")
+    todo = Todo(description=description)
+    db.session.add(todo)
 
-        return render_template("index.html", data=Todo.query.all())
-
+    db.session.commit()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run()
