@@ -19,9 +19,9 @@ db.create_all()
 
 @app.route("/")
 def index():
-    # empty = Todo.query.filter(Todo.description=="")
-    # empty.delete()
-    # db.session.commit()
+    empty = Todo.query.filter(Todo.description=="")
+    empty.delete()
+    db.session.commit()
     return render_template("index.html", data=Todo.query.all())
 
 
