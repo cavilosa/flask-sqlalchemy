@@ -16,11 +16,12 @@ class Todo(db.Model):
     __tablename__ = 'todos'
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
 
     def __rep__(self):
         return f"<Todo {self.id} {self.descriptions}>"
 
-#db.create_all() - migrations will do it for us? 
+#db.create_all() - migrations will do it for us?
 
 @app.route("/")
 def index():
