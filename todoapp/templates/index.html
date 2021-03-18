@@ -8,6 +8,9 @@
         .hidden {
             display: none;
         }
+        ul {
+            list-style: none;
+        }
     </style>
     <body>
 
@@ -18,7 +21,8 @@
         <form id="form">
             <div >
                 <label for="todo">Create a To-Do</label>
-                <input type="text" id="description" name="description">
+                <input type="text" id="description"
+                    name="description">
             </div>
             <div>
                 <input type="submit" name="submit" id="submit" value="Create">
@@ -28,13 +32,32 @@
         <ul id="todos">
             {% for d in data %}
             <li>
-                <input type="checkbox" {% if d.completed %} checked {% endif %}>
+                <input class="check-completed" type="checkbox"
+                    {% if d.completed %} checked {% endif %}>
                 {{ d.description }}
             </li>
             {% endfor %}
         </ul>
 
     <script type="text/javascript">
+        const checkboxes = document.querySelectorAll(".check-completed");
+        for ( let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            checkbox.onchange = function(e){
+                console.log("event", e);
+                const newCompleted = e.targer.checked;
+                fetch = ("todos/set-completed", {
+                    method: "POST",
+                    body: JSON.stringify( {
+                        'completed': newCompleted
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+            }
+        }
+
         document.querySelector("#form").onsubmit = function(e) {
            e.preventDefault(); //so the page doesn't reload
            const description = document.querySelector("#description").value;
