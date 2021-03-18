@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for
+from flask import jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
+import sys
 
 app = Flask(__name__) # the app gets named after the name of the file
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:cavilosa1@localhost:5432/todoapp'
@@ -19,21 +21,35 @@ db.create_all()
 
 @app.route("/")
 def index():
-    empty = Todo.query.filter(Todo.description=="")
-    empty.delete()
-    db.session.commit()
+    # empty = Todo.query.filter(Todo.description=="")
+    # empty.delete()
+    # db.session.commit()
     return render_template("index.html", data=Todo.query.all())
 
 
 @app.route("/todos/create", methods=["POST"])
 def create_todo():
-    description = request.get_json()["description"]
-    todo = Todo(description=description)
-    db.session.add(todo)
-    db.session.commit()
-    return jsonify({
-        "description": todo.description
-    })
+    error = False
+    body = {}
+    try:
+        description = request.get_json()["description"]
+        todo = Todo(description=description)
+        db.session.add(todo)
+        db.session.commit()
+        body["description"] = todo.description
+        # if not error:
+        #     return jsonify(body)
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if error:
+        abort(400)
+    else:
+        return jsonify(body)
+
 
 if __name__ == '__main__':
     app.run()

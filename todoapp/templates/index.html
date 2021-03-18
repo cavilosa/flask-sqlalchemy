@@ -36,10 +36,10 @@
            e.preventDefault(); //so the page doesn't reload
            const description = document.querySelector("#description").value;
            if (description === ""){
-               document.querySelector("#error").className = "";
-               const error = document.querySelector("#error")
-               error.innerHTML = "The filed should be not empty"
-           } else{
+                document.querySelector("#error").className = "";
+                const error = document.querySelector("#error")
+                error.innerHTML = "The filed should be not empty"
+           } else {
                fetch("/todos/create", {
                    method: "POST",
                    body: JSON.stringify(
