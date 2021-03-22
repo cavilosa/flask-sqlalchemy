@@ -11,6 +11,22 @@
         ul {
             list-style: none;
         }
+        li {
+            clear: both;
+        }
+        li button {
+          -webkit-appearance: none;
+          border: none;
+          outline: none;
+          color: red;
+          float: right;
+          cursor: pointer;
+          font-size: 20px;
+        }
+        .lists-wrapper, .todos-wrapper {
+          display: inline-block;
+          vertical-align: top;
+        }
     </style>
     <body>
 
@@ -32,28 +48,38 @@
         <ul id="todos">
             {% for d in data %}
             <li>
-                <input class="check-completed" type="checkbox"
-                    {% if d.completed %} checked {% endif %}>
+                <input class="check-completed" data-type = "{{ d.id }}"
+                    type="checkbox" {% if d.completed %} checked {% endif %}>
+                    <!-- checked here equals to true in the table -->
                 {{ d.description }}
             </li>
             {% endfor %}
         </ul>
 
     <script type="text/javascript">
+
         const checkboxes = document.querySelectorAll(".check-completed");
         for ( let i = 0; i < checkboxes.length; i++) {
             const checkbox = checkboxes[i];
             checkbox.onchange = function(e){
                 console.log("event", e);
-                const newCompleted = e.targer.checked;
-                fetch = ("todos/set-completed", {
+                const todoId = e.target.dataset["type"];
+                const newCompleted = e.target.checked; // sets check to true
+                fetch ("/todos/" + todoId + "/set-completed", {
                     method: "POST",
                     body: JSON.stringify( {
-                        'completed': newCompleted
+                        'completed': newCompleted // may be can be just True?
                     }),
                     headers: {
                         'Content-Type': 'application/json'
                     }
+                })
+                .then( () => {
+                    document.querySelector("#error").className = "hidden";
+                })
+                .catch( (error)=> {
+                     console.log(error)
+                     document.querySelector("#error").className = "";
                 })
             }
         }
