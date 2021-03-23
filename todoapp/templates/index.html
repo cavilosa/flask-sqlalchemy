@@ -10,6 +10,7 @@
         }
         ul {
             list-style: none;
+            width: 200px;
         }
         li {
             clear: both;
@@ -48,22 +49,47 @@
         <ul id="todos">
             {% for d in data %}
             <li>
-                <input class="check-completed" data-type = "{{ d.id }}"
-                    type="checkbox" {% if d.completed %} checked {% endif %}>
+                <input class="check-completed" data-id = "{{ d.id }}"
+                    type="checkbox" {% if d.completed %} checked {% endif %} />
                     <!-- checked here equals to true in the table -->
                 {{ d.description }}
+                <button type="button" id="delete" data-id = "{{ d.id }}"
+                    name="button">&cross;</button>
             </li>
             {% endfor %}
         </ul>
 
+
     <script type="text/javascript">
 
+        const deleteButtons = document.querySelectorAll("#delete");
+
+        for (let i = 0; i < deleteButtons.length; i++) {
+            const deleteButton = deleteButtons[i];
+            deleteButton.addEventListener("click", (e)=>{
+                e.preventDefault();
+                console.log("delete event", e);
+                const deleteId = e.target.dataset["id"];
+                fetch ("/todos/" + deleteId + "/delete", {
+                    method: "POST"
+                })
+                .then( () => {
+                    document.querySelector("#error").className = "hidden";
+                })
+                .catch( (error)=> {
+                     console.log(error)
+                     document.querySelector("#error").className = "";
+                })
+            })
+        }
+
+
         const checkboxes = document.querySelectorAll(".check-completed");
-        for ( let i = 0; i < checkboxes.length; i++) {
+        for (let i = 0; i < checkboxes.length; i++) {
             const checkbox = checkboxes[i];
             checkbox.onchange = function(e){
                 console.log("event", e);
-                const todoId = e.target.dataset["type"];
+                const todoId = e.target.dataset["id"];
                 const newCompleted = e.target.checked; // sets check to true
                 fetch ("/todos/" + todoId + "/set-completed", {
                     method: "POST",

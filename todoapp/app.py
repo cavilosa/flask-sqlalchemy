@@ -31,6 +31,20 @@ def index():
     return render_template("index.html", data=Todo.query.order_by("id").all())
 
 
+@app.route("/todos/<todo_id>/delete", methods=["POST"])
+def delete_item(todo_id):
+    try:
+        Todo.query.filter_by(id=todo_id).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    # return jsonify({ 'success': True })
+    return redirect(url_for("index"))
+
+
+
 @app.route("/todos/<todo_id>/set-completed", methods=["POST"])
 def set_completed_todo(todo_id):
     try:
@@ -57,6 +71,7 @@ def create_todo():
         body["description"] = todo.description
         # if not error:
         #     return jsonify(body)
+
     except:
         error = True
         db.session.rollback()
