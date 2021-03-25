@@ -82,7 +82,8 @@ def create_todo():
     body = {}
     try:
         description = request.get_json()["description"]
-        todo = Todo(description=description)
+        list_id = request.get_json()["list_id"]
+        todo = Todo(description=description, list_id=list_id)
         db.session.add(todo)
         db.session.commit()
         body["description"] = todo.description
