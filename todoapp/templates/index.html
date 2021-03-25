@@ -25,54 +25,77 @@
           cursor: pointer;
           font-size: 20px;
         }
-        .lists-wrapper, .todos-wrapper{
-          display: inline-block;
-          vertical-align: top;
+
+        .items {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-around;
+        }
+
+        input {
+            max-width: 100px;
         }
 
     </style>
     <body>
-
+        <h1>Todo App</h1>
         <div id="error" class="hidden">
             Something went wrong!
         </div>
+        <div class="items">
+            <div class="lists-wrapper">
+                <h2>TODO LISTS</h2>
+                <div class="create-list">
+                    <form id="create-list">
+                        <div class="create-list">
+                            <label for="create_list">Create list</label>
+                            <input type="text" id="list-name" value="A new List">
+                            <input type="submit" name="submit" value="Create List">
 
-        <div class="lists-wrapper">
-            <ul id="lists">
-                {% for list in lists %}
-                    <a href="/lists/{{ list.id }}">{{ list.name }}</a>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="todos-wrapper">
-            <h4> {{ active_list.name }}</h4>
-            <form id="form">
-                <div >
-                    <label for="todo">Create a To-Do</label>
-                    <input type="text" id="description"
-                        name="description">
+                        </div>
+                    </form>
                 </div>
-                <div>
-                    <input type="submit" name="submit" id="submit" value="Create">
-                </div>
-            </form>
 
-            <ul id="todos">
-                {% for todo in todos %}
-                <li>
-                    <input class="check-completed" data-id = "{{ todo.id }}"
-                        type="checkbox" {% if todo.completed %} checked {% endif %} />
-                        <!-- checked here equals to true in the table -->
-                    {{ todo.description }}
-                    <button type="button" id="delete" data-id = "{{ todo.id }}"
-                        name="button">&cross;</button>
-                </li>
-                {% endfor %}
-            </ul>
+                <ul id="lists">
+                    {% for list in lists %}
+                    <li>
+                        <input type="checkbox" class="check-completed"
+                            data-id = "{{ list.id }}">
+                        <a href="/lists/{{ list.id }}">{{ list.name }}</a>
+                        <button type="button" id="delete" name = "button"
+                            data-id = {{ list.id }}>&cross;</button>
+                    </li>
+
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="todos-wrapper">
+                <h2>TODO ITEMS</h2>
+                <h4> {{ active_list.name }}</h4>
+                <form id="form">
+                    <div >
+                        <label for="todo">Create Task</label>
+                        <input type="text" id="description"
+                            name="Task description">
+                        <input type="submit" name="submit" id="submit" value="Create">
+                    </div>
+                </form>
+
+                <ul id="todos">
+                    {% for todo in todos %}
+                    <li>
+                        <input class="check-completed" data-id = "{{ todo.id }}"
+                            type="checkbox" {% if todo.completed %} checked {% endif %} />
+                            <!-- checked here equals to true in the table -->
+                        {{ todo.description }}
+                        <button type="button" id="delete" data-id = "{{ todo.id }}"
+                            name="button">&cross;</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-
-
 
     <script type="text/javascript">
 
@@ -155,6 +178,40 @@
                     document.querySelector("#error").className = "";
                })
            }
+
+            // dovument.querySelector("#create-list").onsubmit = function(e) {
+            //     e.preventDefault();
+            //     console.log("submit list", e)
+            //     const newList = document.querySelector("#list-name").value;
+            //     if (value === "") {
+            //         const error =  document.querySelector("#error")
+            //         error.className = "";
+            //         error.innerHTML = "List name can't be empty"
+            //     } else {
+            //         fetch("/lists/create" + newList, {
+            //             method: "POST",
+            //             body: JSON.stringify({
+            //                 "name": newList
+            //             }),
+            //             headers: {
+            //                 "Content-Type":"application/json"
+            //             }
+            //         })
+            //         .then( (response) => {
+            //             return response.json();
+            //         })
+            //         .then( (resJson) => {
+            //             console.log("list resjson", resJson);
+            //             const listItem = document.createElement("LI")
+            //             listItem.innerHTML = resJson["name"];
+            //             document.querySelector("#lists").appendChild(listItem);
+            //         })
+            //         .catch( (error)=> {
+            //              console.log(error)
+            //              document.querySelector("#error").className = "";
+            //         })
+            //     }
+            // }
 
         }
     </script>
