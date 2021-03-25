@@ -32,12 +32,18 @@ class TodoList(db.Model):
     todos = db.relationship('Todo', backref='list', lazy=True)
 
 
-@app.route("/")
-def index():
+@app.route("/lists/<list_id>")
+def get_list_todos(list_id):
     empty = Todo.query.filter(Todo.description=="")
     empty.delete()
     db.session.commit()
-    return render_template("index.html", data=Todo.query.order_by("id").all())
+    return render_template("index.html", data=Todo.query.filter_by
+                                        (list_id=list_id).order_by("id").all())
+
+
+@app.route("/")
+def index():
+    return redirect(url_for('get_list_todos', list_id = 1))
 
 
 @app.route("/todos/<todo_id>/delete", methods=["POST"])
