@@ -10,7 +10,8 @@
         }
         ul {
             list-style: none;
-            width: 200px;
+            width: 300px;
+            display: inline-block;
         }
         li {
             clear: both;
@@ -24,10 +25,11 @@
           cursor: pointer;
           font-size: 20px;
         }
-        .lists-wrapper, .todos-wrapper {
+        .lists-wrapper, .todos-wrapper{
           display: inline-block;
           vertical-align: top;
         }
+
     </style>
     <body>
 
@@ -35,29 +37,41 @@
             Something went wrong!
         </div>
 
-        <form id="form">
-            <div >
-                <label for="todo">Create a To-Do</label>
-                <input type="text" id="description"
-                    name="description">
-            </div>
-            <div>
-                <input type="submit" name="submit" id="submit" value="Create">
-            </div>
-        </form>
+        <div class="lists-wrapper">
+            <ul id="lists">
+                {% for list in lists %}
+                    <a href="/lists/{{ list.id }}">{{ list.name }}</a>
+                {% endfor %}
+            </ul>
+        </div>
 
-        <ul id="todos">
-            {% for d in data %}
-            <li>
-                <input class="check-completed" data-id = "{{ d.id }}"
-                    type="checkbox" {% if d.completed %} checked {% endif %} />
-                    <!-- checked here equals to true in the table -->
-                {{ d.description }}
-                <button type="button" id="delete" data-id = "{{ d.id }}"
-                    name="button">&cross;</button>
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="todos-wrapper">
+            <h4> {{ active_list.name }}</h4>
+            <form id="form">
+                <div >
+                    <label for="todo">Create a To-Do</label>
+                    <input type="text" id="description"
+                        name="description">
+                </div>
+                <div>
+                    <input type="submit" name="submit" id="submit" value="Create">
+                </div>
+            </form>
+
+            <ul id="todos">
+                {% for todo in todos %}
+                <li>
+                    <input class="check-completed" data-id = "{{ todo.id }}"
+                        type="checkbox" {% if todo.completed %} checked {% endif %} />
+                        <!-- checked here equals to true in the table -->
+                    {{ todo.description }}
+                    <button type="button" id="delete" data-id = "{{ todo.id }}"
+                        name="button">&cross;</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
 
 
     <script type="text/javascript">

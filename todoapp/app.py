@@ -37,8 +37,10 @@ def get_list_todos(list_id):
     empty = Todo.query.filter(Todo.description=="")
     empty.delete()
     db.session.commit()
-    return render_template("index.html", data=Todo.query.filter_by
-                                        (list_id=list_id).order_by("id").all())
+    return render_template("index.html",
+    lists=TodoList.query.all(),
+    active_list = TodoList.query.get(list_id),
+    todos=Todo.query.filter_by(list_id=list_id).order_by("id").all())
 
 
 @app.route("/")
