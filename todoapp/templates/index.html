@@ -46,12 +46,11 @@
             <div class="lists-wrapper">
                 <h2>TODO LISTS</h2>
                 <div class="create-list">
-                    <form id="create-list">
+                    <form id="createList">
                         <div class="create-list">
                             <label for="create_list">Create list</label>
-                            <input type="text" id="list-name" value="A new List">
-                            <input type="submit" name="submit" value="Create List">
-
+                            <input type="text" id="new-list">
+                            <input type="submit" id="submit-list" name="submit" value="Create List">
                         </div>
                     </form>
                 </div>
@@ -59,10 +58,11 @@
                 <ul id="lists">
                     {% for list in lists %}
                     <li>
-                        <input type="checkbox" class="check-completed"
-                            data-id = "{{ list.id }}">
+                        <input type="checkbox" class="list-completed"
+                            data-id = "{{ list.id }}"
+                            {% if list.completed %} checked {% endif %}>
                         <a href="/lists/{{ list.id }}">{{ list.name }}</a>
-                        <button type="button" id="delete" name = "button"
+                        <button type="button" id="delete-list" name = "button"
                             data-id = {{ list.id }}>&cross;</button>
                     </li>
 
@@ -78,7 +78,7 @@
                         <label for="todo">Create Task</label>
                         <input type="text" id="description"
                             name="Task description">
-                        <input type="submit" name="submit" id="submit" value="Create">
+                        <input type="submit" name="submit" id="submit" value="Create task">
                     </div>
                 </form>
 
@@ -112,6 +112,32 @@
                 })
                 .then( () => {
                     document.querySelector("#error").className = "hidden";
+                    const item = e.target.parentElement;
+                    item.remove();
+                    window.location.reload(true);
+                })
+                .catch( (error)=> {
+                     console.log(error)
+                     document.querySelector("#error").className = "";
+                })
+            })
+        }
+
+        const deleteLists = document.querySelectorAll("#delete-list");
+        for (let i = 0; i < deleteLists.length; i++) {
+            const deleteList = deleteLists[i];
+            deleteList.addEventListener("click", (e) => {
+                e.preventDefault();
+                console.log("delete list event", e)
+                const deleteId = e.target.dataset["id"];
+                console.log(deleteId)
+                fetch ("/lists/" + deleteId + "/delete", {
+                    method: "POST"
+                })
+                .then( () => {
+                    document.querySelector("#error").className = "hidden";
+                    const item = e.target.parentElement;
+                    item.remove();
                 })
                 .catch( (error)=> {
                      console.log(error)
@@ -128,6 +154,7 @@
                 console.log("event", e);
                 const todoId = e.target.dataset["id"];
                 const newCompleted = e.target.checked; // sets check to true
+
                 fetch ("/todos/" + todoId + "/set-completed", {
                     method: "POST",
                     body: JSON.stringify( {
@@ -147,6 +174,78 @@
             }
         }
 
+        const checkLists = document.querySelectorAll(".list-completed");
+        for (let i = 0; i < checkLists.length; i++) {
+            const checkList = checkLists[i];
+            checkList.onchange = function (e) {
+                console.log("list check event", e)
+
+                const listId = e.target.dataset["id"]
+                console.log("list id onchange", listId)
+                const newCompleted = e.target.checked; // sets check to true
+                fetch("/lists/" + listId + "/set-completed", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        "completed": newCompleted
+                    }),
+                    headers: {
+                        'Content-Type': "application/json"
+                    }
+                })
+                .then( (jsonResponse) => {
+                    document.querySelector("#error").className = "hidden";
+
+                    const checkCompleted = document.querySelector(".check-completed");
+
+                    for (let i = 0; i<checkCompleted.length; i++) {
+                        const checkbox = checkCompleted[i];
+                        checkbox.checked = true;
+                    }
+                    window.location.reload(true);
+                })
+                .catch( (error)=> {
+                     console.log(error)
+                     document.querySelector("#error").className = "";
+                })
+            }
+        };
+
+        document.querySelector("#createList").onsubmit = function(e) {
+           e.preventDefault();
+           console.log("event list", e)
+           const list_name = document.querySelector("#new-list").value;
+           console.log("newlist", list_name)
+           if (list_name === "") {
+               const error =  document.querySelector("#error")
+               error.className = "";
+               error.innerHTML = "List name can't be empty"
+           } else {
+               fetch("/lists/" + list_name + "/create", {
+                   method: "POST",
+                   body: JSON.stringify({
+                       "name": list_name
+                   }),
+                   headers: {
+                       "Content-Type": "application/json"
+                   }
+               })
+               .then( (response) => {
+                   return response.json();
+               })
+               .then( (resJson) => {
+                   console.log("list resjson");
+                   const listItem = document.createElement("LI")
+                   listItem.innerHTML = resJson["name"];
+                   document.querySelector("#lists").appendChild(listItem);
+                   window.location.reload(true);
+               })
+               .catch( (error)=> {
+                    console.log(error)
+                    document.querySelector("#error").className = "";
+               })
+           }
+        }
+
         document.querySelector("#form").onsubmit = function(e) {
            e.preventDefault(); //so the page doesn't reload
            const description = document.querySelector("#description").value;
@@ -158,7 +257,9 @@
                fetch("/todos/create", {
                    method: "POST",
                    body: JSON.stringify(
-                       {"description": description}
+                       {"description": description,
+                        "list_id": {{ active_list.id }}
+                        }
                    ),
                    headers: {
                        "Content-Type": "application/json"
@@ -172,47 +273,13 @@
                    const liItem = document.createElement("LI");
                    liItem.innerHTML = jsonResponse["description"];
                    document.querySelector("#todos").appendChild(liItem);
+                   window.location.reload(true);
                })
                .catch( (error)=> {
                     console.log(error)
                     document.querySelector("#error").className = "";
                })
            }
-
-            // dovument.querySelector("#create-list").onsubmit = function(e) {
-            //     e.preventDefault();
-            //     console.log("submit list", e)
-            //     const newList = document.querySelector("#list-name").value;
-            //     if (value === "") {
-            //         const error =  document.querySelector("#error")
-            //         error.className = "";
-            //         error.innerHTML = "List name can't be empty"
-            //     } else {
-            //         fetch("/lists/create" + newList, {
-            //             method: "POST",
-            //             body: JSON.stringify({
-            //                 "name": newList
-            //             }),
-            //             headers: {
-            //                 "Content-Type":"application/json"
-            //             }
-            //         })
-            //         .then( (response) => {
-            //             return response.json();
-            //         })
-            //         .then( (resJson) => {
-            //             console.log("list resjson", resJson);
-            //             const listItem = document.createElement("LI")
-            //             listItem.innerHTML = resJson["name"];
-            //             document.querySelector("#lists").appendChild(listItem);
-            //         })
-            //         .catch( (error)=> {
-            //              console.log(error)
-            //              document.querySelector("#error").className = "";
-            //         })
-            //     }
-            // }
-
         }
     </script>
     </body>
